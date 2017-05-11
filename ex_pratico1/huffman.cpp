@@ -55,7 +55,7 @@ void Huffman::geraArvore(){
 		//cout << "size: " << pq.size() << " pq: " << "'" << pq.top().simbolo << "' => " << pq.top().probabilidade << endl;
 		direita = new Nodo(pq.top()); pq.pop();
 		esquerda = new Nodo(pq.top()); pq.pop();
-		cout << "esquerda " << esquerda->probabilidade << " direita " << direita->probabilidade  << endl;
+		//cout << "esquerda " << esquerda->probabilidade << " direita " << direita->probabilidade  << endl;
 		novo = new Nodo(esquerda, direita, NULL, esquerda->probabilidade + direita->probabilidade, '\0');
 		direita->raiz = novo;
 		esquerda->raiz = novo;
@@ -64,15 +64,16 @@ void Huffman::geraArvore(){
 		// 	" esq: " << novo->filhoEsquerda->probabilidade << " dir: " << novo->filhoDireita->probabilidade << endl;
 		pq.push(*novo);
 	}
-	arvoreDeProbabilidades = new Nodo(pq.top());
+	//arvoreDeProbabilidades = new Nodo(pq.top());
 	
-	//printArvore(arvoreDeProbabilidades);
+	printArvore(arvoreDeProbabilidades);
 }; 
 
 void Huffman::printArvore(Nodo* arvore){
 	if(arvore != NULL){
 		printArvore(arvore->filhoEsquerda);
-		cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << endl;
+		if(arvore->simbolo != '\0')
+			cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << endl;
 		printArvore(arvore->filhoDireita);
 	}
 }
