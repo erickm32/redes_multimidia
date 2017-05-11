@@ -11,7 +11,6 @@ Huffman::Huffman(string textoEntrada, string nomeArquivoProbabilidades,
 	this->nomeArquivoCodificado = nomeArquivoCodificado;
 	this->nomeArquivoDecodificado = nomeArquivoDecodificado;
 
-	this->arvoreDeProbabilidades = NULL;
 	
 }; 
 
@@ -51,14 +50,32 @@ void Huffman::calculaProbabilidade(){
 };
 
 void Huffman::geraArvore(){
+	Nodo *esquerda,*direita, *novo;
+	while(pq.size() > 1){
+		//cout << "size: " << pq.size() << " pq: " << "'" << pq.top().simbolo << "' => " << pq.top().probabilidade << endl;
+		direita = new Nodo(pq.top()); pq.pop();
+		esquerda = new Nodo(pq.top()); pq.pop();
+		cout << "esquerda " << esquerda->probabilidade << " direita " << direita->probabilidade  << endl;
+		novo = new Nodo(esquerda, direita, NULL, esquerda->probabilidade + direita->probabilidade, '\0');
+		direita->raiz = novo;
+		esquerda->raiz = novo;
 
-	while(pq.size() > 0){
-		cout << "size: " << pq.size() << " pq: " << "'" << pq.top().simbolo << "' => " << pq.top().probabilidade << endl;
-		pq.pop();
+		//cout << "novo " << novo->simbolo << " " << novo->probabilidade <<
+		// 	" esq: " << novo->filhoEsquerda->probabilidade << " dir: " << novo->filhoDireita->probabilidade << endl;
+		pq.push(*novo);
 	}
-
-
+	arvoreDeProbabilidades = new Nodo(pq.top());
+	
+	//printArvore(arvoreDeProbabilidades);
 }; 
+
+void Huffman::printArvore(Nodo* arvore){
+	if(arvore != NULL){
+		printArvore(arvore->filhoEsquerda);
+		cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << endl;
+		printArvore(arvore->filhoDireita);
+	}
+}
 
 void Huffman::comprimeTexto(){
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );

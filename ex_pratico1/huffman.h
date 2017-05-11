@@ -25,6 +25,7 @@ private:
 
 	void calculaProbabilidade();
 	void geraArvore();
+	void printArvore(Nodo *arvore);
 
 public:
 	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 
