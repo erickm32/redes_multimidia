@@ -32,18 +32,18 @@ struct Nodo {
     }
 
     bool operator<(const Nodo &n) const {
-        return (this->probabilidade < n.probabilidade);
-    }
-
-    bool operator<=(const Nodo &n) const {
-        return (this->probabilidade <= n.probabilidade);
-    }
-
-    bool operator>(const Nodo &n) const {
         return (this->probabilidade > n.probabilidade);
     }
 
-    bool operator>=(const Nodo &n) const {
+    bool operator<=(const Nodo &n) const {
         return (this->probabilidade >= n.probabilidade);
+    }
+
+    bool operator>(const Nodo &n) const {
+        return (this->probabilidade < n.probabilidade);
+    }
+
+    bool operator>=(const Nodo &n) const {
+        return (this->probabilidade <= n.probabilidade);
     }
 };

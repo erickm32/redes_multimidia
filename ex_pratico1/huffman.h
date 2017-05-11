@@ -20,14 +20,17 @@ private:
 
 	int qntCaracteresEntrada;
 	map<char,float> hash_caracteres;
+	Nodo* arvoreDeProbabilidades;
+	priority_queue<Nodo> pq;
+
+	void calculaProbabilidade();
+	void geraArvore();
 
 public:
 	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 
 		string nomeArquivoCodificado, string nomeArquivoDecodificado);
 	~Huffman();
 	string getTextoEntrada();
-	void calculaProbabilidade();
-	void geraArvore();
 	void comprimeTexto();
 	void descomprimeTexto();
 };

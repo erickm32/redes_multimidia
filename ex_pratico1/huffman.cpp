@@ -10,6 +10,8 @@ Huffman::Huffman(string textoEntrada, string nomeArquivoProbabilidades,
 	this->nomeArquivoProbabilidades = nomeArquivoProbabilidades;
 	this->nomeArquivoCodificado = nomeArquivoCodificado;
 	this->nomeArquivoDecodificado = nomeArquivoDecodificado;
+
+	this->arvoreDeProbabilidades = NULL;
 	
 }; 
 
@@ -29,17 +31,18 @@ void Huffman::calculaProbabilidade(){
 
 	for (map<char,float>::iterator it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
 		it->second = it->second / qntCaracteresEntrada;
-    	cout << it->first << " => " << it->second << '\n';
+    	//cout << it->first << " => " << it->second << '\n';
 	}
 
 	arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::out);// | ios::app);
 	if ( arquivoProbabilidades.is_open() ){
-		// Grava no arquivo de probabilidades
+		// Grava no arquivo de probabilidades e faz a fila de prioridades
 		for (map<char,float>::iterator it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
+			Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
+			pq.push(*nodo);
+    		delete nodo;
     		arquivoProbabilidades << it->first << " " << it->second << '\n';
 		}
-
-
 		arquivoProbabilidades.close();
 	}
 	else{
@@ -49,11 +52,20 @@ void Huffman::calculaProbabilidade(){
 
 void Huffman::geraArvore(){
 
+	while(pq.size() > 0){
+		cout << "size: " << pq.size() << " pq: " << "'" << pq.top().simbolo << "' => " << pq.top().probabilidade << endl;
+		pq.pop();
+	}
+
+
 }; 
 
 void Huffman::comprimeTexto(){
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );
 	if ( arquivoCodificado.is_open() ){
+		calculaProbabilidade();
+		geraArvore();
+
 
 		arquivoCodificado.close();
 	}
