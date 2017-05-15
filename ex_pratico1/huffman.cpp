@@ -9,9 +9,7 @@ Huffman::Huffman(string textoEntrada, string nomeArquivoProbabilidades,
 	this->qntCaracteresEntrada = textoEntrada.size();
 	this->nomeArquivoProbabilidades = nomeArquivoProbabilidades;
 	this->nomeArquivoCodificado = nomeArquivoCodificado;
-	this->nomeArquivoDecodificado = nomeArquivoDecodificado;
-
-	
+	this->nomeArquivoDecodificado = nomeArquivoDecodificado;	
 }; 
 
 Huffman::~Huffman(){
@@ -64,7 +62,9 @@ void Huffman::geraArvore(){
 		// 	" esq: " << novo->filhoEsquerda->probabilidade << " dir: " << novo->filhoDireita->probabilidade << endl;
 		pq.push(*novo);
 	}
-	//arvoreDeProbabilidades = new Nodo(pq.top());
+	cout << "geraArvore\n" ;
+	cout << pq.top().simbolo << " " << pq.top().probabilidade << endl;
+	arvoreDeProbabilidades = new Nodo(pq.top());
 	
 	printArvore(arvoreDeProbabilidades);
 }; 
@@ -72,18 +72,65 @@ void Huffman::geraArvore(){
 void Huffman::printArvore(Nodo* arvore){
 	if(arvore != NULL){
 		printArvore(arvore->filhoEsquerda);
-		if(arvore->simbolo != '\0')
+		//if(arvore->simbolo != '\0')
 			cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << endl;
 		printArvore(arvore->filhoDireita);
 	}
 }
 
+
+	int codigo_calc = 0;
+ 	int comprimento = 0;
+void Huffman::code(Nodo *raiz){
+	//cout << "Chega no inicio\n";
+	if (raiz != NULL){
+		pbits.push(0);  		//push(pbits, 0);
+		cout << "antes esquerda raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
+	 	code(raiz->filhoEsquerda);
+	 	pbits.pop(); 			//pop(pbits);
+	 	pbits.push(1); 		//push(pbits, 1);
+	 	cout << "antes direita raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
+	 	code(raiz->filhoDireita);
+	 	pbits.pop(); 			//pop(pbits);
+ 	}
+ 	else{ //chegou na folha
+ 		//cout << "Chega em una folha";
+ 		if(!pbits.empty()){ cout << "pbits.size: " << pbits.size() << endl;}
+ 		stack<int> pilha_codigo = pbits; //copia a pilha inteira
+ 		codigo_calc = 0;
+ 		comprimento = 0;
+ 		while (!pilha_codigo.empty()){
+ 			codigo_calc = codigo_calc | pilha_codigo.top(); //ou bit-a-bit
+ 			codigo_calc = codigo_calc << 1;
+ 			//cout << "codigo_calc " << codigo_calc << " top: " << pilha_codigo.top();
+ 			pilha_codigo.pop();
+ 			comprimento += 1;
+ 			//cout << " comprimento " << comprimento << endl; 
+ 		}
+ 	}
+ 	if(raiz != NULL){
+ 		if(raiz->simbolo != '\0'){
+ 			tamanhoDoCodigo[raiz->simbolo] = comprimento;
+ 			codigo[raiz->simbolo] = codigo_calc;
+ 		}
+ 	}
+}
+
 void Huffman::comprimeTexto(){
+	calculaProbabilidade();
+	geraArvore();
+	code(arvoreDeProbabilidades);
+
+	for(map<char,int>::iterator it=codigo.begin(); it!=codigo.end(); ++it){
+		cout << "char: " << it->first << " codigo " << bitset<12>( it->second )
+			 << dec << " tamanhoDoCodigo " << tamanhoDoCodigo[it->first] << endl;
+	}
+
+
+
+
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );
 	if ( arquivoCodificado.is_open() ){
-		calculaProbabilidade();
-		geraArvore();
-
 
 		arquivoCodificado.close();
 	}
