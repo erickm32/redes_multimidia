@@ -84,19 +84,26 @@ void Huffman::printArvore(Nodo* arvore){
 void Huffman::code(Nodo *raiz){
 	//cout << "Chega no inicio\n";
 	if (raiz != NULL){
-		pbits.push(0);  		//push(pbits, 0);
-		cout << "antes esquerda raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
+		pbits.push(1);  		//push(pbits, 0);
+		//cout << "antes esquerda raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
 	 	code(raiz->filhoEsquerda);
 	 	pbits.pop(); 			//pop(pbits);
-	 	pbits.push(1); 		//push(pbits, 1);
-	 	cout << "antes direita raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
+	 	cout << "depois do pop 1 pbits.size: " << pbits.size() << endl;
+	 	pbits.push(0); 		//push(pbits, 1);
+	 	//cout << "antes direita raiz->simbolo " << raiz->simbolo << " " << raiz->probabilidade << " " << pbits.size() << endl;
 	 	code(raiz->filhoDireita);
 	 	pbits.pop(); 			//pop(pbits);
+	 	cout << "depois do pop 0 pbits.size: " << pbits.size() << endl;
+	 	if(raiz->simbolo != '\0'){
+ 			tamanhoDoCodigo[raiz->simbolo] = comprimento;
+ 			codigo[raiz->simbolo] = codigo_calc;
+ 		}
  	}
  	else{ //chegou na folha
  		//cout << "Chega em una folha";
- 		if(!pbits.empty()){ cout << "pbits.size: " << pbits.size() << endl;}
+ 		cout << "pbits.size: " << pbits.size() << endl;
  		stack<int> pilha_codigo = pbits; //copia a pilha inteira
+ 		pilha_codigo.pop();
  		codigo_calc = 0;
  		comprimento = 0;
  		while (!pilha_codigo.empty()){
@@ -106,12 +113,6 @@ void Huffman::code(Nodo *raiz){
  			pilha_codigo.pop();
  			comprimento += 1;
  			//cout << " comprimento " << comprimento << endl; 
- 		}
- 	}
- 	if(raiz != NULL){
- 		if(raiz->simbolo != '\0'){
- 			tamanhoDoCodigo[raiz->simbolo] = comprimento;
- 			codigo[raiz->simbolo] = codigo_calc;
  		}
  	}
 }
