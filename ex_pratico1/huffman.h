@@ -25,13 +25,14 @@ private:
 	Nodo* arvoreDeProbabilidades;
 	priority_queue<Nodo> pq;
 	stack<int> pbits;
-	map<char, int> codigo;
+	map<char, string> codigo;
 	map<char, int> tamanhoDoCodigo;
 
 	void calculaProbabilidade();
 	void geraArvore();
 	void printArvore(Nodo *arvore);
 	void code(Nodo *raiz);
+	void code(Nodo *raiz, const string &codigo);
 
 public:
 	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 

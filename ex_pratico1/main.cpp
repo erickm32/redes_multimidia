@@ -7,7 +7,7 @@ using namespace std;
 int main(){
 	string entrada;
 	string arquivoProbabilidades = "probs.txt";
-	string arquivoCodificado = "coded";
+	string arquivoCodificado = "coded.bin";
 	string arquivoDecodificado = "saida.txt";
 
 	cin >> entrada;
