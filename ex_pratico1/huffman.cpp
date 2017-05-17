@@ -28,7 +28,6 @@ void Huffman::calculaProbabilidade(){
 
 	for (map<char,float>::iterator it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
 		it->second = it->second / qntCaracteresEntrada;
-    	//cout << it->first << " => " << it->second << '\n';
 	}
 
 	arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::out);// | ios::app);
@@ -38,8 +37,9 @@ void Huffman::calculaProbabilidade(){
 			Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
 			pq.push(*nodo);
     		delete nodo;
-    		arquivoProbabilidades << it->first << " " << it->second << '\n';
+    		arquivoProbabilidades << it->first << " " << fixed << std::setfill('0') << std::setprecision(30) <<  it->second << '\n';
 		}
+		arquivoProbabilidades << "bytes " << qntCaracteresEntrada << endl;
 		arquivoProbabilidades.close();
 	}
 	else{
@@ -50,52 +50,23 @@ void Huffman::calculaProbabilidade(){
 void Huffman::geraArvore(){
 	Nodo *esquerda,*direita, *novo;
 	while(pq.size() > 1){
-		//cout << "_" << endl;
-		//cout << "size: " << pq.size() << " pq: " << "'" << pq.top().simbolo << "' => " << pq.top().probabilidade << endl;
-		//cout << pq.top().simbolo << " " << pq.top().probabilidade << " " << pq.top().probabilidade * qntCaracteresEntrada << endl;
 		direita = new Nodo(pq.top()); pq.pop();
-		//cout << pq.top().simbolo << " " << pq.top().probabilidade << " " << pq.top().probabilidade * qntCaracteresEntrada << endl;
 		esquerda = new Nodo(pq.top()); pq.pop();
 		novo = new Nodo(esquerda, direita, NULL, esquerda->probabilidade + direita->probabilidade, '\0');
 		direita->raiz = novo;
 		esquerda->raiz = novo;
-		//cout << "n" << novo->simbolo << " " << novo->probabilidade << " " << novo->probabilidade * qntCaracteresEntrada << endl;
 
-		//cout << "novo " << novo->simbolo << " " << novo->probabilidade <<
-		// 	" esq: " << novo->filhoEsquerda->probabilidade << " dir: " << novo->filhoDireita->probabilidade << endl;
 		pq.push(*novo);
-		//cout << "-" << endl;
 	}
-	//cout << "geraArvore\n" ;
-	//cout << pq.top().simbolo << " " << pq.top().probabilidade << endl;
+
 	arvoreDeProbabilidades = new Nodo(pq.top());
-	
-	//printArvore(arvoreDeProbabilidades);
+	while(!pq.empty()){
+		pq.pop();
+	}
 }; 
-
-void Huffman::printArvore(Nodo* arvore){
-	if(arvore != NULL){
-		printArvore(arvore->filhoEsquerda);
-		//if(arvore->simbolo != '\0')
-			cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << endl;
-		printArvore(arvore->filhoDireita);
-	}
-}
-
-
-void printCod(Nodo* arvore){
-	if(arvore != NULL){
-		printCod(arvore->filhoEsquerda);
-		if(arvore->simbolo != '\0')
-			cout << "'" << arvore->simbolo << "' " << arvore->probabilidade << " _" << arvore->codigo << "_" << endl;
-		printCod(arvore->filhoDireita);
-	}
-}
-
 
 
 void Huffman::code(Nodo *raiz, const string &codigo){
-	//cout << "Chega no inicio\n";
 	if (raiz != NULL){
 		raiz->codigo = codigo + '1';
 	 	code(raiz->filhoEsquerda, raiz->codigo);
@@ -104,9 +75,7 @@ void Huffman::code(Nodo *raiz, const string &codigo){
 	 	code(raiz->filhoDireita, raiz->codigo);
 	 	raiz->codigo.pop_back();
 	 	if(raiz->simbolo != '\0'){
- 			//tamanhoDoCodigo[raiz->simbolo] = comprimento;
  			tamanhoDoCodigo[raiz->simbolo] = codigo.size();
- 			//this->codigo[raiz->simbolo] = codigo_calc;
  			this->codigo[raiz->simbolo] = codigo;
  		}
  	}
@@ -116,15 +85,6 @@ void Huffman::comprimeTexto(){
 	calculaProbabilidade();
 	geraArvore();
 	code(arvoreDeProbabilidades, "");
-
-	//printCod(arvoreDeProbabilidades);
-
-	/*
-	for(auto it=codigo.begin(); it!=codigo.end(); ++it){
-		cout << "char: " << it->first << " codigo " << bitset<12>( it->second )
-			 << dec << " tamanhoDoCodigo " << tamanhoDoCodigo[it->first] << endl;
-	}
-	*/
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );
 	if ( arquivoCodificado.is_open() ){
 		// altamente inspirado em
@@ -148,13 +108,11 @@ void Huffman::comprimeTexto(){
 		}
 
 		if (bitsInBuffer > 0){ // enche com zeros o restante pra fechar um byte
-			//cout << "bitBuffer: " << bitset<8>(bitBuffer) << endl;
   			do {
   				if (bitsInBuffer > 7) {
     				arquivoCodificado.write((char*)&bitBuffer, 1);
-    				//cout << "byte escrito: " << bitset<8>(bitBuffer) << endl;
     				bitsInBuffer = 0;
-    				bitBuffer = 0; // just to be tidy
+    				bitBuffer = 0;
 				}
 
   				bitBuffer = (bitBuffer << 1) | 0;
@@ -168,18 +126,59 @@ void Huffman::comprimeTexto(){
 	}
 };
 
+map<char, float> Huffman::probsParser(){
+	if(!arquivoProbabilidades.is_open()){
+		arquivoProbabilidades.open(nomeArquivoProbabilidades, ios::in);
+	}
+	map<char, float> probsLidas;
+	if(arquivoProbabilidades.is_open()){
+		string linha;
+		while(!arquivoProbabilidades.eof()){
+			arquivoProbabilidades  >> linha;
+			if(arquivoProbabilidades.eof()) break;
+
+			if(linha == "bytes"){
+				arquivoProbabilidades >> linha;
+				numeroBytesCodificados = stoi(linha);
+			}
+			if(linha[0] >= 'A' && linha[0] <= 'Z'){
+				char c = linha[0];
+				arquivoProbabilidades  >> linha;
+				probsLidas[c] = stof(linha);
+			}
+
+		}
+	}
+	else{
+		cerr << "Erro ao ler o arquivo de probabilidades" << endl;
+	}
+	arquivoProbabilidades.close();
+	return probsLidas;
+};
+
 void Huffman::descomprimeTexto(){
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::in | ios::binary );
-	arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::in );
+	//arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::in );
 	arquivoDecodificado.open(nomeArquivoDecodificado.data(), ios::out);
 
-	//talvez remontar a arvore aqui ;
+	hash_caracteres.clear();
+	hash_caracteres = probsParser();
+	if(hash_caracteres.empty()){
+		cerr << "Não conseguiu remontar as probabilidades dos caracteres." << endl;
+		exit(1);
+	}
+
+	for (auto it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
+			Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
+			pq.push(*nodo);
+    		delete nodo;
+		}
+	arvoreDeProbabilidades = NULL;
+	geraArvore();
+	code(arvoreDeProbabilidades, "");
 
 	if ( !arquivoCodificado.is_open() ){
 		cerr << "Não foi possível ler o arquivo codificado" << endl;
-	}
-	if ( !arquivoProbabilidades.is_open() ){
-		cerr << "Não foi possível ler o arquivo de probabilidades" << endl;
 	}
 	if ( !arquivoDecodificado.is_open() ){
 		cerr << "Não foi possível ler o arquivo codificado" << endl;
@@ -189,12 +188,11 @@ void Huffman::descomprimeTexto(){
 	int bitsInBuffer, bit = 0;
 	string codeReaded;
 	char simbolo;
-	while(!arquivoCodificado.eof()){
+	int numBytesLidos = 0;
+	while(!arquivoCodificado.eof() && numBytesLidos < numeroBytesCodificados ){
 		arquivoCodificado.read((char*)&byte, 1);
 		if(arquivoCodificado.eof()) break;
-		//cout << "byte lido: " << bitset<8>(byte) << endl;
 		bitsInBuffer = 8;
-		//codeReaded = "";
 
 		while(bitsInBuffer > 0){
 			bit = byte & 0x80; // 10000000
@@ -202,19 +200,17 @@ void Huffman::descomprimeTexto(){
 			--bitsInBuffer;
 			codeReaded.push_back(bit == 0x80 ? '1' : '0');
 			simbolo = findSymbol(arvoreDeProbabilidades, codeReaded);
-			//cout << "simbolo encontrado: '" << simbolo << "'" << endl;
-			if(simbolo != '\0'){
+			if(simbolo != '\0' && numBytesLidos < numeroBytesCodificados){
 				arquivoDecodificado << simbolo;
+				numBytesLidos+=1;
 				codeReaded = "";
 			}
 		}
-		//cout << "codeReaded " << codeReaded << endl;
 
 	}
 
 
 	arquivoDecodificado.close();
-	arquivoProbabilidades.close();
 	arquivoCodificado.close();
 
 };

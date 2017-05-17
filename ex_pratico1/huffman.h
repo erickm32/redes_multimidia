@@ -5,6 +5,7 @@
 #include <map>
 #include <stack>
 #include <bitset>
+#include <iomanip>
 
 #include "nodo.h"
 
@@ -28,11 +29,13 @@ private:
 	map<char, string> codigo;
 	map<char, int> tamanhoDoCodigo;
 
+	int numeroBytesCodificados;
+
 	void calculaProbabilidade();
 	void geraArvore();
 	void printArvore(Nodo *arvore);
-	void code(Nodo *raiz);
 	void code(Nodo *raiz, const string &codigo);
+	map<char, float> probsParser();
 	char findSymbol(Nodo* raiz, const string& codeReaded);
 
 public:
