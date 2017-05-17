@@ -3,8 +3,6 @@
 #include <string>
 #include <queue>          // std::priority_queue
 #include <map>
-#include <stack>
-#include <bitset>
 #include <iomanip>
 
 #include "nodo.h"
@@ -25,7 +23,6 @@ private:
 	map<char,float> hash_caracteres;
 	Nodo* arvoreDeProbabilidades;
 	priority_queue<Nodo> pq;
-	stack<int> pbits;
 	map<char, string> codigo;
 	map<char, int> tamanhoDoCodigo;
 
@@ -33,7 +30,6 @@ private:
 
 	void calculaProbabilidade();
 	void geraArvore();
-	void printArvore(Nodo *arvore);
 	void code(Nodo *raiz, const string &codigo);
 	map<char, float> probsParser();
 	char findSymbol(Nodo* raiz, const string& codeReaded);
@@ -42,7 +38,6 @@ public:
 	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 
 		string nomeArquivoCodificado, string nomeArquivoDecodificado);
 	~Huffman();
-	string getTextoEntrada();
 	void comprimeTexto();
 	void descomprimeTexto();
 };
