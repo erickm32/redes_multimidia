@@ -93,21 +93,16 @@ void printCod(Nodo* arvore){
 }
 
 
-	int codigo_calc = 0;
- 	int comprimento = 0;
+
 void Huffman::code(Nodo *raiz, const string &codigo){
 	//cout << "Chega no inicio\n";
 	if (raiz != NULL){
-		pbits.push(1);  		//push(pbits, 0);
 		raiz->codigo = codigo + '1';
 	 	code(raiz->filhoEsquerda, raiz->codigo);
 	 	raiz->codigo.pop_back();
-	 	pbits.pop(); 			//pop(pbits);
-	 	pbits.push(0); 		//push(pbits, 1);
 	 	raiz->codigo = codigo + '0';
 	 	code(raiz->filhoDireita, raiz->codigo);
 	 	raiz->codigo.pop_back();
-	 	pbits.pop(); 			//pop(pbits);
 	 	if(raiz->simbolo != '\0'){
  			//tamanhoDoCodigo[raiz->simbolo] = comprimento;
  			tamanhoDoCodigo[raiz->simbolo] = codigo.size();
@@ -115,35 +110,6 @@ void Huffman::code(Nodo *raiz, const string &codigo){
  			this->codigo[raiz->simbolo] = codigo;
  		}
  	}
- 	else{ //chegou na folha
- 		stack<int> pilha_codigo = pbits; //copia a pilha inteira
- 		codigo_calc = 0;
- 		comprimento = 0;
- 		while (!pilha_codigo.empty()){
- 			codigo_calc = codigo_calc | pilha_codigo.top(); //ou bit-a-bit
- 			codigo_calc = codigo_calc << 1;
- 			pilha_codigo.pop();
- 			comprimento += 1;
- 		}
- 	}
-}
-
-int current_bit = 0;
-unsigned char bit_buffer;
-
-FILE *f;
-
-void WriteBit (int bit){
-  if (bit)
-    bit_buffer |= (1<<current_bit);
-
-  current_bit++;
-  if (current_bit == 8)
-  {
-    fwrite (&bit_buffer, 1, 1, f);
-    current_bit = 0;
-    bit_buffer = 0;
-  }
 }
 
 void Huffman::comprimeTexto(){
@@ -161,12 +127,11 @@ void Huffman::comprimeTexto(){
 	*/
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );
 	if ( arquivoCodificado.is_open() ){
-		//noskipws
+		// altamente inspirado em
+		// http://stackoverflow.com/questions/28573597/bitstream-of-variable-length-huffman-codes-how-to-write-to-file?rq=1
 		int bitsInBuffer = 0;
 		unsigned char bitBuffer;
 		for(int i = 0; i < qntCaracteresEntrada; i++){
-			//arquivoCodificado << codigo[textoEntrada[i]];
-			//arquivoCodificado.write(, tamanhoDoCodigo[textoEntrada[i]]);
 			string cod = codigo[textoEntrada[i]];
 			for (char c : cod){
 				int bit = c == '1' ? 1 : 0;
@@ -182,13 +147,12 @@ void Huffman::comprimeTexto(){
 			}
 		}
 
-		if (bitsInBuffer > 0){ // enche com zeros
-			//cout << "entra no if " << bitsInBuffer << endl;
+		if (bitsInBuffer > 0){ // enche com zeros o restante pra fechar um byte
+			//cout << "bitBuffer: " << bitset<8>(bitBuffer) << endl;
   			do {
-  				//cout << "uma vez no loop" << endl;
   				if (bitsInBuffer > 7) {
-  					//cout << "bitbuffer "<< bitset<8>(bitBuffer) << endl;
     				arquivoCodificado.write((char*)&bitBuffer, 1);
+    				//cout << "byte escrito: " << bitset<8>(bitBuffer) << endl;
     				bitsInBuffer = 0;
     				bitBuffer = 0; // just to be tidy
 				}
@@ -209,6 +173,8 @@ void Huffman::descomprimeTexto(){
 	arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::in );
 	arquivoDecodificado.open(nomeArquivoDecodificado.data(), ios::out);
 
+	//talvez remontar a arvore aqui ;
+
 	if ( !arquivoCodificado.is_open() ){
 		cerr << "Não foi possível ler o arquivo codificado" << endl;
 	}
@@ -219,6 +185,33 @@ void Huffman::descomprimeTexto(){
 		cerr << "Não foi possível ler o arquivo codificado" << endl;
 	}
 
+	unsigned char byte = 0;
+	int bitsInBuffer, bit = 0;
+	string codeReaded;
+	char simbolo;
+	while(!arquivoCodificado.eof()){
+		arquivoCodificado.read((char*)&byte, 1);
+		if(arquivoCodificado.eof()) break;
+		//cout << "byte lido: " << bitset<8>(byte) << endl;
+		bitsInBuffer = 8;
+		//codeReaded = "";
+
+		while(bitsInBuffer > 0){
+			bit = byte & 0x80; // 10000000
+			byte = byte << 1;
+			--bitsInBuffer;
+			codeReaded.push_back(bit == 0x80 ? '1' : '0');
+			simbolo = findSymbol(arvoreDeProbabilidades, codeReaded);
+			//cout << "simbolo encontrado: '" << simbolo << "'" << endl;
+			if(simbolo != '\0'){
+				arquivoDecodificado << simbolo;
+				codeReaded = "";
+			}
+		}
+		//cout << "codeReaded " << codeReaded << endl;
+
+	}
+
 
 	arquivoDecodificado.close();
 	arquivoProbabilidades.close();
@@ -226,6 +219,24 @@ void Huffman::descomprimeTexto(){
 
 };
 
+char Huffman::findSymbol(Nodo* raiz, const string& codeReaded){
+	if(raiz != NULL){
+		if (raiz->codigo == codeReaded){
+			return raiz->simbolo;
+		}
+		else{
+			char ret;
+			ret = findSymbol(raiz->filhoEsquerda, codeReaded);
+			if(ret == '\0'){
+				ret = findSymbol(raiz->filhoDireita, codeReaded);
+			}
+			return ret;
+		}
+	}
+	return '\0';
+}
+
+
 string Huffman::getTextoEntrada(){
 	return textoEntrada;
-}
+};

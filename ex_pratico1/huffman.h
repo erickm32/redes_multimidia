@@ -33,6 +33,7 @@ private:
 	void printArvore(Nodo *arvore);
 	void code(Nodo *raiz);
 	void code(Nodo *raiz, const string &codigo);
+	char findSymbol(Nodo* raiz, const string& codeReaded);
 
 public:
 	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 

@@ -20,6 +20,7 @@ int main(){
 	//Foram gerados 5 parágrafos 520 palavrase 3472 bytes de LoremIpsum
 
 	h->comprimeTexto();
+	h->descomprimeTexto();
 
 	return 0;	
 }
