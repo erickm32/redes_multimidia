@@ -10,7 +10,6 @@ int main(){
 	string arquivoCodificado = "coded.bin";
 	string arquivoDecodificado = "saida.txt";
 
-	//cin >> entrada;
 	getline(cin, entrada);
 
 	Huffman *h;
@@ -18,10 +17,11 @@ int main(){
 	h = new Huffman(entrada, arquivoProbabilidades, arquivoCodificado, arquivoDecodificado);
 
 	//cout << h->getTextoEntrada() << endl;
-	//Foram gerados 5 parágrafos 520 palavrase 3472 bytes de LoremIpsum
 
 	h->comprimeTexto();
 	h->descomprimeTexto();
+
+	delete h;
 
 	return 0;	
 }

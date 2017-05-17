@@ -89,23 +89,19 @@ map<char, float> Huffman::probsParser(){
 	if(arquivoProbabilidades.is_open()){
 		string linha;
 		while(!arquivoProbabilidades.eof()){
-			arquivoProbabilidades >> linha;
+			//arquivoProbabilidades >> linha;
+			getline(arquivoProbabilidades, linha);
 			if(arquivoProbabilidades.eof()) break;
 
-			try{
-				float probabilidadeEspaco = stof(linha);
-				probsLidas[' '] = probabilidadeEspaco;
+			cout << linha << endl;;
 
-			} catch (invalid_argument& e){
-				if(linha == "bytes"){
-					arquivoProbabilidades >> linha;
-					numeroBytesCodificados = stoi(linha);
-				}
-				if((linha[0] >= 'A' && linha[0] <= 'Z') || linha[0] == ' '){
-					char c = linha[0];
-					arquivoProbabilidades  >> linha;
-					probsLidas[c] = stof(linha);
-				}
+			if((linha[0] >= 'A' && linha[0] <= 'Z') || linha[0] == ' '){
+				char simbolo = linha[0];
+				probsLidas[simbolo] = stof(linha.substr(2));
+			}
+			else{
+				arquivoProbabilidades >> linha;
+				numeroBytesCodificados = stoi(linha.substr(6));
 			}
 		}
 	}
