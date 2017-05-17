@@ -3,7 +3,7 @@
 using namespace std;
 
 Huffman::Huffman(){
-	
+
 }; 
 
 Huffman::~Huffman(){
@@ -16,7 +16,6 @@ Huffman::~Huffman(){
 	if ( arquivoDecodificado.is_open() ){
 		arquivoDecodificado.close();
 	}
-	// free na arvore
 }
 
 void Huffman::calculaProbabilidade(){
