@@ -2,7 +2,13 @@
 
 using namespace std;
 
-void Huffman::descomprimeTexto(){
+void Huffman::descomprimeTexto(string nomeArquivoProbabilidades,
+							   string nomeArquivoCodificado, 
+							   string nomeArquivoDecodificado){
+
+	this->nomeArquivoProbabilidades = nomeArquivoProbabilidades;
+	this->nomeArquivoCodificado = nomeArquivoCodificado;
+
 	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::in | ios::binary );
 	//arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::in );
 	arquivoDecodificado.open(nomeArquivoDecodificado.data(), ios::out);
@@ -15,10 +21,10 @@ void Huffman::descomprimeTexto(){
 	}
 
 	for (auto it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
-			Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
-			pq.push(*nodo);
-    		delete nodo;
-		}
+		Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
+		pq.push(*nodo);
+    	delete nodo;
+	}
 	arvoreDeProbabilidades = NULL;
 	geraArvore();
 	code(arvoreDeProbabilidades, "");

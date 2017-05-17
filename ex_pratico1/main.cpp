@@ -5,21 +5,18 @@
 using namespace std;
 
 int main(){
-	string entrada;
-	string arquivoProbabilidades = "probs.txt";
-	string arquivoCodificado = "coded.bin";
-	string arquivoDecodificado = "saida.txt";
+	string nomeArquivoEntrada = "entrada2.txt";
 
-	getline(cin, entrada);
+	string nomeArquivoProbabilidades = "probs.txt";
+	string nomeArquivoCodificado = "coded.bin";
+	string nomeArquivoDecodificado = "saida.txt";
 
 	Huffman *h;
 
-	h = new Huffman(entrada, arquivoProbabilidades, arquivoCodificado, arquivoDecodificado);
+	h = new Huffman();
 
-	//cout << h->getTextoEntrada() << endl;
-
-	h->comprimeTexto();
-	h->descomprimeTexto();
+	h->comprimeTexto(nomeArquivoEntrada, nomeArquivoProbabilidades, nomeArquivoCodificado);
+	h->descomprimeTexto(nomeArquivoProbabilidades, nomeArquivoCodificado, nomeArquivoDecodificado);
 
 	delete h;
 

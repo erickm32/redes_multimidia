@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <queue>          // std::priority_queue
+#include <queue>
 #include <map>
 #include <iomanip>
 
@@ -35,9 +35,12 @@ private:
 	char findSymbol(Nodo* raiz, const string& codeReaded);
 
 public:
-	Huffman(string textoEntrada, string nomeArquivoProbabilidades, 
-		string nomeArquivoCodificado, string nomeArquivoDecodificado);
+	Huffman();
 	~Huffman();
-	void comprimeTexto();
-	void descomprimeTexto();
+	void comprimeTexto( string textoEntrada, 
+						string nomeArquivoProbabilidades, 
+						string nomeArquivoCodificado);
+	void descomprimeTexto(	string nomeArquivoProbabilidades, 
+							string nomeArquivoCodificado, 
+							string nomeArquivoDecodificado);
 };

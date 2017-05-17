@@ -2,7 +2,17 @@
 
 using namespace std;
 
-void Huffman::comprimeTexto(){
+void Huffman::comprimeTexto(string nomeArquivoEntrada, 
+							string nomeArquivoProbabilidades,
+							string nomeArquivoCodificado){
+
+	ifstream arquivoEntrada(nomeArquivoEntrada);
+	getline(arquivoEntrada, this->textoEntrada);
+	
+	this->qntCaracteresEntrada = this->textoEntrada.size();
+	this->nomeArquivoProbabilidades = nomeArquivoProbabilidades;
+	this->nomeArquivoCodificado = nomeArquivoCodificado;
+
 	calculaProbabilidade();
 	geraArvore();
 	code(arvoreDeProbabilidades, "");

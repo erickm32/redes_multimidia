@@ -2,14 +2,8 @@
 
 using namespace std;
 
-Huffman::Huffman(string textoEntrada, string nomeArquivoProbabilidades, 
-	string nomeArquivoCodificado, string nomeArquivoDecodificado){
-
-	this->textoEntrada = textoEntrada;
-	this->qntCaracteresEntrada = textoEntrada.size();
-	this->nomeArquivoProbabilidades = nomeArquivoProbabilidades;
-	this->nomeArquivoCodificado = nomeArquivoCodificado;
-	this->nomeArquivoDecodificado = nomeArquivoDecodificado;	
+Huffman::Huffman(){
+	
 }; 
 
 Huffman::~Huffman(){
@@ -19,6 +13,10 @@ Huffman::~Huffman(){
 	if ( arquivoCodificado.is_open() ) {
 		arquivoCodificado.close();
 	}
+	if ( arquivoDecodificado.is_open() ){
+		arquivoDecodificado.close();
+	}
+	// free na arvore
 }
 
 void Huffman::calculaProbabilidade(){
