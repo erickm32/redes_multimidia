@@ -10,7 +10,8 @@ int main(){
 	string arquivoCodificado = "coded.bin";
 	string arquivoDecodificado = "saida.txt";
 
-	cin >> entrada;
+	//cin >> entrada;
+	getline(cin, entrada);
 
 	Huffman *h;
 

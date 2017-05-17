@@ -81,51 +81,6 @@ void Huffman::code(Nodo *raiz, const string &codigo){
  	}
 }
 
-void Huffman::comprimeTexto(){
-	calculaProbabilidade();
-	geraArvore();
-	code(arvoreDeProbabilidades, "");
-	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::out | ios::binary );
-	if ( arquivoCodificado.is_open() ){
-		// altamente inspirado em
-		// http://stackoverflow.com/questions/28573597/bitstream-of-variable-length-huffman-codes-how-to-write-to-file?rq=1
-		int bitsInBuffer = 0;
-		unsigned char bitBuffer;
-		for(int i = 0; i < qntCaracteresEntrada; i++){
-			string cod = codigo[textoEntrada[i]];
-			for (char c : cod){
-				int bit = c == '1' ? 1 : 0;
-
-
-				if (bitsInBuffer > 7) {
-					arquivoCodificado.write((char*)&bitBuffer, 1);
-					bitsInBuffer = 0;
-					bitBuffer = 0;
-				}
-				bitBuffer = (bitBuffer << 1) | (bit);
-				bitsInBuffer++;
-			}
-		}
-
-		if (bitsInBuffer > 0){ // enche com zeros o restante pra fechar um byte
-  			do {
-  				if (bitsInBuffer > 7) {
-    				arquivoCodificado.write((char*)&bitBuffer, 1);
-    				bitsInBuffer = 0;
-    				bitBuffer = 0;
-				}
-
-  				bitBuffer = (bitBuffer << 1) | 0;
-  				bitsInBuffer++;
-  			} while (bitsInBuffer != 1);
-  		}
-		arquivoCodificado.close();
-	}
-	else {
-		cerr << "Não foi possível gravar o arquivo codificado" << endl;
-	}
-};
-
 map<char, float> Huffman::probsParser(){
 	if(!arquivoProbabilidades.is_open()){
 		arquivoProbabilidades.open(nomeArquivoProbabilidades, ios::in);
@@ -134,19 +89,24 @@ map<char, float> Huffman::probsParser(){
 	if(arquivoProbabilidades.is_open()){
 		string linha;
 		while(!arquivoProbabilidades.eof()){
-			arquivoProbabilidades  >> linha;
+			arquivoProbabilidades >> linha;
 			if(arquivoProbabilidades.eof()) break;
 
-			if(linha == "bytes"){
-				arquivoProbabilidades >> linha;
-				numeroBytesCodificados = stoi(linha);
-			}
-			if(linha[0] >= 'A' && linha[0] <= 'Z'){
-				char c = linha[0];
-				arquivoProbabilidades  >> linha;
-				probsLidas[c] = stof(linha);
-			}
+			try{
+				float probabilidadeEspaco = stof(linha);
+				probsLidas[' '] = probabilidadeEspaco;
 
+			} catch (invalid_argument& e){
+				if(linha == "bytes"){
+					arquivoProbabilidades >> linha;
+					numeroBytesCodificados = stoi(linha);
+				}
+				if((linha[0] >= 'A' && linha[0] <= 'Z') || linha[0] == ' '){
+					char c = linha[0];
+					arquivoProbabilidades  >> linha;
+					probsLidas[c] = stof(linha);
+				}
+			}
 		}
 	}
 	else{
@@ -156,64 +116,6 @@ map<char, float> Huffman::probsParser(){
 	return probsLidas;
 };
 
-void Huffman::descomprimeTexto(){
-	arquivoCodificado.open(nomeArquivoCodificado.data(), ios::in | ios::binary );
-	//arquivoProbabilidades.open(nomeArquivoProbabilidades.data(), ios::in );
-	arquivoDecodificado.open(nomeArquivoDecodificado.data(), ios::out);
-
-	hash_caracteres.clear();
-	hash_caracteres = probsParser();
-	if(hash_caracteres.empty()){
-		cerr << "Não conseguiu remontar as probabilidades dos caracteres." << endl;
-		exit(1);
-	}
-
-	for (auto it=hash_caracteres.begin(); it!=hash_caracteres.end(); ++it){
-			Nodo *nodo = new Nodo(NULL, NULL, NULL, it->second, it->first);
-			pq.push(*nodo);
-    		delete nodo;
-		}
-	arvoreDeProbabilidades = NULL;
-	geraArvore();
-	code(arvoreDeProbabilidades, "");
-
-	if ( !arquivoCodificado.is_open() ){
-		cerr << "Não foi possível ler o arquivo codificado" << endl;
-	}
-	if ( !arquivoDecodificado.is_open() ){
-		cerr << "Não foi possível ler o arquivo codificado" << endl;
-	}
-
-	unsigned char byte = 0;
-	int bitsInBuffer, bit = 0;
-	string codeReaded;
-	char simbolo;
-	int numBytesLidos = 0;
-	while(!arquivoCodificado.eof() && numBytesLidos < numeroBytesCodificados ){
-		arquivoCodificado.read((char*)&byte, 1);
-		if(arquivoCodificado.eof()) break;
-		bitsInBuffer = 8;
-
-		while(bitsInBuffer > 0){
-			bit = byte & 0x80; // 10000000
-			byte = byte << 1;
-			--bitsInBuffer;
-			codeReaded.push_back(bit == 0x80 ? '1' : '0');
-			simbolo = findSymbol(arvoreDeProbabilidades, codeReaded);
-			if(simbolo != '\0' && numBytesLidos < numeroBytesCodificados){
-				arquivoDecodificado << simbolo;
-				numBytesLidos+=1;
-				codeReaded = "";
-			}
-		}
-
-	}
-
-
-	arquivoDecodificado.close();
-	arquivoCodificado.close();
-
-};
 
 char Huffman::findSymbol(Nodo* raiz, const string& codeReaded){
 	if(raiz != NULL){
@@ -233,6 +135,3 @@ char Huffman::findSymbol(Nodo* raiz, const string& codeReaded){
 }
 
 
-string Huffman::getTextoEntrada(){
-	return textoEntrada;
-};
