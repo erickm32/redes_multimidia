@@ -90,8 +90,6 @@ map<char, float> Huffman::probsParser(){
 			getline(arquivoProbabilidades, linha);
 			if(arquivoProbabilidades.eof()) break;
 
-			cout << linha << endl;;
-
 			if((linha[0] >= 'A' && linha[0] <= 'Z') || linha[0] == ' '){
 				char simbolo = linha[0];
 				probsLidas[simbolo] = stof(linha.substr(2));
