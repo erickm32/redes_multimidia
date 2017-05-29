@@ -5,8 +5,8 @@
 
 #include "jo_jpeg.h"
 
-bool codifica(const char *filename, const void *data, int width, int height, int comp, int quality);
-bool decodifica(const char *filename, const void *data, int width, int height, int comp, int quality);
+bool codifica(const char *filename, void *data, int width, int height, int comp, int quality);
+bool decodifica(const char *filename, void *data, int width, int height, int comp, int quality);
 // ???
 
 using namespace std;
@@ -21,8 +21,11 @@ int main(){
 
 	ifstream imagem("lena.raw", ios::binary);
 	imagem.read((char*)lena, width*height*component);
+	//lena, menor byte 91, maior byte 221
 
 	bool cod = codifica("deixaQuietoPorAgora", lena, width, height, component, quality);
+	string ret = jo_write_jpg("testandoMexerNoRaw90", lena, width, height, component, quality) ? "ok" : "deu ruim";
+ 	cout << ret << endl;
 
 	if (cod){
 		cout << "Codificou ok" << endl;
