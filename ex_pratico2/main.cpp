@@ -31,6 +31,7 @@ int main(){
 		cout << "Algo de errado não está certo na codificação." << endl;
 	}
 
+/*
 	bool decod = decodifica("deixaQuietoPorAgora", lena, width, height, component, quality);
 
 	if (decod){
@@ -39,7 +40,7 @@ int main(){
 	else{
 		cout << "Algo de errado não está certo na codificação." << endl;
 	}
-
+*/
 
 	
 
