@@ -5,60 +5,68 @@
 
 #include "jo_jpeg.h"
 
-bool codifica(const char *filename, void *data, int width, int height, int comp, int quality);
-bool decodifica(const char *filename, void *data, int width, int height, int comp, int quality);
-// ???
+unsigned char* codifica(void *data, int width, int height, int comp);
+unsigned char* decodifica(void *data, int width, int height, int comp);
 
 using namespace std;
 
 int main(){
 
-	int width = 512;
-	int height = 512;
-	int component = 1;
-	int quality = 90;
-	unsigned char* lena = new unsigned char[width*height*component];
+	int width = 512, height = 512, component = 1, quality = 90;
+	unsigned char* original = new unsigned char[width*height*component];
 
+	// abre o raw da imagem original
 	ifstream imagem("lena.raw", ios::binary);
-	imagem.read((char*)lena, width*height*component);
-	//lena, menor byte 91, maior byte 221
+	imagem.read((char*)original, width*height*component);
+	imagem.close();
 
-	bool cod = codifica("deixaQuietoPorAgora", lena, width, height, component, quality);
-	string ret = jo_write_jpg("testandoMexerNoRaw90", lena, width, height, component, quality) ? "ok" : "deu ruim";
- 	cout << ret << endl;
+	// aplica a predição sobre a 'original' e retorna o residuo, 'original' - 'predita'
+	unsigned char* residuo = codifica((void*)original, width, height, component);
 
-	if (cod){
-		cout << "Codificou ok" << endl;
+	if (residuo != NULL){
+		cout << "Residuo ok" << endl;
 	}
 	else{
-		cout << "Algo de errado não está certo na codificação." << endl;
+		cout << "Algo de errado não está certo na predição." << endl;
+		exit(1);
 	}
 
-/*
-	bool decod = decodifica("deixaQuietoPorAgora", lena, width, height, component, quality);
+	// guarda o residuo em um .raw
+	ofstream saida("residuo.raw", ios::binary);
+	saida.write((char*)residuo, width*height*component);
+	saida.close();
 
-	if (decod){
-		cout << "Decodificou ok" << endl;
+	// faz um jpg da imagem original e da de residuo, mais para teste e visualização
+	string ret = jo_write_jpg("original-90.jpg", original, width, height, component, quality) ? "ok" : "deu ruim";
+	cout << "Original: " << ret << endl;
+	ret = jo_write_jpg("residuo-90.jpg", residuo, width, height, component, quality) ? "ok" : "deu ruim";
+	cout << "Residuo: " << ret << endl;
+	free(residuo);
+	free(original);
+	// acaba a etapa de predição
+
+	//começa a etapa inversa, "despredição"
+
+	//le o arquivo com informação de predição
+	residuo = new unsigned char[width*height*component];
+	ifstream predita_raw("residuo.raw", ios::binary);
+	predita_raw.read((char*)residuo, width*height*component);
+	predita_raw.close();
+
+	unsigned char *reconstruida = decodifica((void*)residuo, width, height, component);
+
+	if(reconstruida != NULL){
+		cout << "reconstruida: ok" << endl;
 	}
 	else{
-		cout << "Algo de errado não está certo na codificação." << endl;
+		cout << "Problema na hora da reconstrução da imagem." << endl;
 	}
-*/
 
-	
+	// faz um jpg da imagem original reconstruida, mas não ficou bem correta
+	ret = jo_write_jpg("original-reconstruida-90.jpg", reconstruida, width, height, component, quality) ? "ok" : "deu ruim";
+	cout << "Original reconstruida: " << ret << endl;
 
-/*  Basic usage:
- *	char *foo = new char[128*128*4]; // 4 component. RGBX format, where X is unused 
- *	jo_write_jpg("foo.jpg", foo, 128, 128, 4, 90); // comp can be 1, 3, or 4. Lum, RGB, or RGBX respectively.
- 
- 	string ret = jo_write_jpg("teste90", lena, width, height, component, quality) ? "ok" : "deu ruim";
- 	cout << ret << endl;
- 	ret = jo_write_jpg("teste1", lena, width, height, component, 1) ? "ok" : "deu ruim";
-	cout << ret << endl;
-	ret = jo_write_jpg("teste25", lena, width, height, component, 25) ? "ok" : "deu ruim";
-	cout << ret << endl;
-	ret = jo_write_jpg("teste75", lena, width, height, component, 75) ? "ok" : "deu ruim";
-	cout << ret << endl;
- */
+	free(residuo);
+	free(reconstruida);
 	return 0;
 }
